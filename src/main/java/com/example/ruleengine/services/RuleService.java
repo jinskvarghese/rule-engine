@@ -1,24 +1,45 @@
 package com.example.ruleengine.services;
 
-import com.example.ruleengine.models.Node;
+// import org.hibernate.mapping.Map;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
+import com.example.ruleengine.models.Node;
 @Service
 public class RuleService {
 
     // Method to create an AST from a rule string
     public Node createRule(String ruleString) {
-        // Trim spaces from the input rule
-        ruleString = ruleString.trim();
+        ruleString = ruleString.trim().replaceAll("^\"|\"$", "");
 
-        // If it's a simple condition, return an operand node (e.g., "age > 30")
+        if (ruleString.isEmpty()) {
+            throw new IllegalArgumentException("Rule string cannot be empty.");
+        }
+
         if (ruleString.contains("AND") || ruleString.contains("OR")) {
-            // Parse complex rule with AND/OR operators
             return parseComplexRule(ruleString);
         } else {
-            // It's a simple operand rule
-            return new Node("operand", ruleString);
+            return validateAndCreateOperand(ruleString);
         }
+    }
+
+    private Node validateAndCreateOperand(String condition) {
+        String[] parts = condition.split(" ");
+        if (parts.length != 3) {
+            throw new IllegalArgumentException("Invalid condition format: " + condition);
+        }
+
+        String attribute = parts[0];
+        String operator = parts[1];
+        String value = parts[2];
+
+        // Validate the operator
+        if (!operator.matches(">|<|=")) {
+            throw new IllegalArgumentException("Invalid operator in condition: " + operator);
+        }
+
+        return new Node("operand", condition);
     }
 
     // Helper function to parse rules with AND/OR operators
@@ -37,7 +58,7 @@ public class RuleService {
         Node leftNode = createRule(parts[0].trim());
         Node rightNode = createRule(parts[1].trim());
 
-        // Return the operator node combining the two sides
+        // Return an operator node combining the two sides
         return new Node("operator", leftNode, rightNode, operator);
     }
 
@@ -46,9 +67,62 @@ public class RuleService {
         return new Node("operator", rule1, rule2, "AND"); // Combines rule1 and rule2 using AND
     }
 
-    // Method to evaluate a rule against user data
-    public boolean evaluateRule(Node rule, Object userData) {
-        // TODO: Add logic to evaluate rule against userData
-        return true; // Dummy implementation for now
+    // Method to evaluate a rule against user data (for later)
+    public boolean evaluateRule(Node rule, Map<String, Object> userData) {
+        if (rule.getType().equals("operand")) {
+            return evaluateCondition(rule.getValue(), userData);
+        } else if (rule.getType().equals("operator")) {
+            boolean leftResult = evaluateRule(rule.getLeft(), userData);
+            boolean rightResult = evaluateRule(rule.getRight(), userData);
+
+            if (rule.getOperator().equals("AND")) {
+                return leftResult && rightResult;
+            } else if (rule.getOperator().equals("OR")) {
+                return leftResult || rightResult;
+            }
+        }
+        return false; // Default case, if the rule is not valid
+    }
+
+    private boolean evaluateCondition(String condition, Map<String, Object> userData) {
+        String[] parts = condition.split(" ");
+        String attribute = parts[0];
+        String operator = parts[1];
+        String value = parts[2];
+
+        // Ensure the attribute exists in the user data
+        if (!userData.containsKey(attribute)) {
+            throw new IllegalArgumentException("Missing required attribute: " + attribute);
+        }
+
+        Object userValue = userData.get(attribute);
+
+        // Validate and compare the values
+        switch (operator) {
+            case ">":
+                return (Integer) userValue > Integer.parseInt(value);
+            case "<":
+                return (Integer) userValue < Integer.parseInt(value);
+            case "=":
+                return userValue.toString().equals(value.replaceAll("'", ""));
+            default:
+                throw new IllegalArgumentException("Unsupported operator: " + operator);
+        }
+    }
+
+    public Node modifyRule(Node root, String oldCondition, String newCondition) {
+        if (root == null) return null;
+
+        // If the current node is an operand and matches the old condition, replace it
+        if (root.getType().equals("operand") && root.getValue().equals(oldCondition)) {
+            root.setValue(newCondition);
+            return root;
+        }
+
+        // Recursively check left and right nodes
+        root.setLeft(modifyRule(root.getLeft(), oldCondition, newCondition));
+        root.setRight(modifyRule(root.getRight(), oldCondition, newCondition));
+
+        return root;
     }
 }
