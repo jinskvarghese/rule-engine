@@ -110,6 +110,14 @@ The project includes a basic HTML-based frontend to interact with the API.
 ### Accessing the UI
 1. Start the Spring Boot application.
 2. Open a browser and go to http://localhost:8080/index.html.
+
+### Security Layer
+- A basic HTTP authentication has been implemented using Spring Security.
+- To access any API endpoint, the user needs to authenticate with the following credentials:
+  - Username: `assignment1`
+  - Password: `zeotap`
+
+
 ### Features:
 - Create Rule: Allows users to input a rule and submit it to the /create API.
 - Combine Rules: Accepts multiple rules (comma-separated) and submits them to the /combine API.
@@ -129,28 +137,3 @@ JavaScript (with fetch) is used for making API calls.
 ## Non-Functional Items
 - Error Handling: The application includes custom error handling for invalid rule strings and malformed data. Validation is performed during rule creation to ensure correctness.
 - Performance Considerations: AST ensures that rule evaluation is efficient, even for complex conditions. The structure is built to handle dynamic modification without affecting performance.
-
-## Testing Instructions
-To test the API, you can use Postman or cURL. Here is an example using cURL:
-
-1. Create a Rule:
-````shell
-curl -X POST http://localhost:8080/api/rules/create \
--H "Content-Type: application/json" \
--d '{"rule": "age > 30 AND department = '\''Sales'\''"}'
-````
-
-2. Evaluate a Rule:
-````shell
-curl -X POST http://localhost:8080/api/rules/evaluate \
--H "Content-Type: application/json" \
--d '{
-      "rule": "age > 30 AND department = '\''Sales'\''",
-      "userData": {
-         "age": 35,
-         "department": "Sales",
-         "salary": 60000,
-         "experience": 3
-      }
-    }'
-````
