@@ -7,6 +7,7 @@ This project implements a 3-tier rule engine application where rules can be dyna
 - Dynamic creation, combination, and evaluation of rules using AST.
 - Rule evaluation against user data based on conditions such as age, department, salary, etc.
 - Error handling and validation for rule creation and data formats.
+- Basic UI for interacting with the Rule Engine.
 
 ---
 
@@ -103,13 +104,27 @@ docker run --name postgres-container -e POSTGRES_USER=rule_engine_user -e POSTGR
 ````
 **Response**: Returns true if the rule matches the user data, otherwise false.
 
+## Frontend UI
+The project includes a basic HTML-based frontend to interact with the API.
+
+### Accessing the UI
+1. Start the Spring Boot application.
+2. Open a browser and go to http://localhost:8080/index.html.
+### Features:
+- Create Rule: Allows users to input a rule and submit it to the /create API.
+- Combine Rules: Accepts multiple rules (comma-separated) and submits them to the /combine API.
+- Evaluate Rule: Inputs both a rule and user data in JSON format to evaluate the rule via the /evaluate API.
+
 ## Design Choices
 ### Abstract Syntax Tree (AST) for Rule Representation:
-- Why AST?: AST allows for a hierarchical and flexible representation of rules. This structure enables dynamic creation and modification of rules, making it easier to combine and evaluate them based on different conditions.
+- AST allows for a hierarchical and flexible representation of rules. This structure enables dynamic creation and modification of rules, making it easier to combine and evaluate them based on different conditions.
 ### Spring Boot:
-- Why Spring Boot?: Spring Boot provides fast setup for web applications with REST APIs, making it ideal for rapid development. It simplifies dependency management and offers excellent integration with databases like PostgreSQL.
+- Spring Boot provides fast setup for web applications with REST APIs, making it ideal for rapid development. It simplifies dependency management and offers excellent integration with databases like PostgreSQL.
 ### PostgreSQL:
-- Why PostgreSQL?: PostgreSQL is chosen for its reliability, scalability, and strong SQL support. It efficiently stores rule metadata and user data required for evaluation.
+- PostgreSQL is chosen for its reliability, scalability, and strong SQL support. It efficiently stores rule metadata and user data required for evaluation.
+### Frontend:
+- A basic HTML interface allows users to create, combine, and evaluate rules using forms.
+JavaScript (with fetch) is used for making API calls.
 
 ## Non-Functional Items
 - Error Handling: The application includes custom error handling for invalid rule strings and malformed data. Validation is performed during rule creation to ensure correctness.

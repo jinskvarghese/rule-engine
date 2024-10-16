@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine UI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label, input {
+            display: block;
+            margin-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Rule Engine</h1>
+
+    <!-- Form for creating a rule -->
+    <form id="createRuleForm">
+        <label for="rule">Create Rule:</label>
+        <textarea id="rule" placeholder="Enter rule, e.g., age > 30 AND department = 'Sales'"></textarea>
+        <button type="submit">Create Rule</button>
+    </form>
+
+    <!-- Form for combining rules -->
+    <form id="combineRulesForm">
+        <label for="rules">Combine Rules (comma separated):</label>
+        <textarea id="rules" placeholder="Enter rules, e.g., age > 30 AND department = 'Sales', age < 25 AND department = 'Marketing'"></textarea>
+        <button type="submit">Combine Rules</button>
+    </form>
+
+    <!-- Form for evaluating rule -->
+    <form id="evaluateRuleForm">
+        <label for="evalRule">Rule to Evaluate:</label>
+        <textarea id="evalRule" placeholder="Enter rule, e.g., age > 30 AND department = 'Sales'"></textarea>
+        <label for="userData">User Data (JSON):</label>
+        <textarea id="userData" placeholder="Enter user data, e.g., {&quot;age&quot;: 35, &quot;department&quot;: &quot;Sales&quot;, &quot;salary&quot;: 60000, &quot;experience&quot;: 3}"></textarea>
+        <button type="submit">Evaluate Rule</button>
+    </form>
+
+    <!-- Result display -->
+    <div class="result" id="result"></div>
+
+    <script>
+        // API request to create a rule
+        document.getElementById('createRuleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const rule = document.getElementById('rule').value;
+            const response = await fetch('/api/rules/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rule: rule })
+            });
+            const result = await response.json();
+            document.getElementById('result').innerText = 'Created Rule AST: ' + JSON.stringify(result, null, 2);
+        });
+
+        // API request to combine rules
+        document.getElementById('combineRulesForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const rules = document.getElementById('rules').value.split(',').map(r => r.trim());
+            const response = await fetch('/api/rules/combine', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rules: rules })
+            });
+            const result = await response.json();
+            document.getElementById('result').innerText = 'Combined Rule AST: ' + JSON.stringify(result, null, 2);
+        });
+
+        // API request to evaluate a rule
+        document.getElementById('evaluateRuleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const rule = document.getElementById('evalRule').value;
+            const userData = JSON.parse(document.getElementById('userData').value);
+            const response = await fetch('/api/rules/evaluate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rule: rule, userData: userData })
+            });
+            const result = await response.json();
+            document.getElementById('result').innerText = 'Evaluation Result: ' + JSON.stringify(result, null, 2);
+        });
+    </script>
+
+</body>
+</html>
