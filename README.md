@@ -117,6 +117,17 @@ The project includes a basic HTML-based frontend to interact with the API.
   - Username: `assignment1`
   - Password: `zeotap`
 
+## Caching
+
+The application uses Spring Boot's caching mechanism to optimize the performance of rule evaluations. The `@Cacheable` annotation is used in the `RuleEvaluationService` to cache rule evaluation results for repeated inputs. The caching mechanism stores the evaluated results of rules to avoid recomputation.
+
+- **Cache Type**: Ehcache/Caffeine
+- **Cache Name**: `ruleEvaluations`
+- **Cache Expiry**: Entries expire after 10 minutes
+- **Maximum Cache Size**: 500 (if using Caffeine)
+
+To modify the caching behavior, adjust the cache settings in `application.properties`.
+
 
 ### Features:
 - Create Rule: Allows users to input a rule and submit it to the /create API.

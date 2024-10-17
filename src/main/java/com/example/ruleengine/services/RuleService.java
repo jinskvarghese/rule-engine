@@ -13,7 +13,7 @@ public class RuleService {
     public Node createRule(String ruleString) {
         ruleString = ruleString.trim().replaceAll("^\"|\"$", "");
 
-        if (ruleString.isEmpty()) {
+        if (ruleString == null || ruleString.isEmpty()) {
             throw new IllegalArgumentException("Rule string cannot be empty.");
         }
 
