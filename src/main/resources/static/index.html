@@ -6,91 +6,179 @@
     <title>Rule Engine UI</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
         }
-        form {
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+        }
+
+        .form-card {
+            background-color: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-        label, input {
+
+        label {
             display: block;
-            margin-bottom: 10px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
         }
-        textarea {
-            width: 100%;
-            height: 100px;
-            margin-bottom: 10px;
-        }
-        button {
+
+        textarea, input {
+            width: calc(100% - 20px); /* Make sure it's full width minus padding */
             padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+
+        textarea:focus, input:focus {
+            border-color: #007BFF;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        button {
+            padding: 12px;
+            width: 100%;
             background-color: #007BFF;
             color: white;
             border: none;
+            border-radius: 4px;
+            font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         .result {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e9f7f9;
+            border: 1px solid #cdecee;
+            border-radius: 6px;
+        }
+
+        .result pre {
+            background-color: #f3f3f3;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            display: none;
             margin-top: 20px;
+            text-align: center;
+        }
+
+        .loading img {
+            width: 50px;
         }
     </style>
 </head>
 <body>
 
-    <h1>Rule Engine</h1>
+    <div class="container">
+        <h1>Rule Engine</h1>
 
-    <!-- Form for creating a rule -->
-    <form id="createRuleForm">
-        <label for="rule">Create Rule:</label>
-        <textarea id="rule" placeholder="Enter rule, e.g., age > 30 AND department = 'Sales'"></textarea>
-        <button type="submit">Create Rule</button>
-    </form>
+        <!-- Form for creating a rule -->
+        <div class="form-card">
+            <form id="createRuleForm">
+                <label for="rule">Create Rule:</label>
+                <textarea id="rule" placeholder="Enter rule, e.g., age > 30 AND department = 'Sales'"></textarea>
+                <button type="submit">Create Rule</button>
+            </form>
+        </div>
 
-    <!-- Form for combining rules -->
-    <form id="combineRulesForm">
-        <label for="rules">Combine Rules (comma separated):</label>
-        <textarea id="rules" placeholder="Enter rules, e.g., age > 30 AND department = 'Sales', age < 25 AND department = 'Marketing'"></textarea>
-        <button type="submit">Combine Rules</button>
-    </form>
+        <!-- Form for combining rules -->
+        <div class="form-card">
+            <form id="combineRulesForm">
+                <label for="rules">Combine Rules (comma separated):</label>
+                <textarea id="rules" placeholder="Enter rules, e.g., age > 30 AND department = 'Sales', age < 25 AND department = 'Marketing'"></textarea>
+                <button type="submit">Combine Rules</button>
+            </form>
+        </div>
 
-    <!-- Form for evaluating rule -->
-    <form id="evaluateRuleForm">
-        <label for="evalRule">Rule to Evaluate:</label>
-        <textarea id="evalRule" placeholder="Enter rule, e.g., age > 30 AND department = 'Sales'"></textarea>
-        <label for="userData">User Data (JSON):</label>
-        <textarea id="userData" placeholder="Enter user data, e.g., {&quot;age&quot;: 35, &quot;department&quot;: &quot;Sales&quot;, &quot;salary&quot;: 60000, &quot;experience&quot;: 3}"></textarea>
-        <button type="submit">Evaluate Rule</button>
-    </form>
+        <!-- Form for evaluating rule -->
+        <div class="form-card">
+            <form id="evaluateRuleForm">
+                <label for="evalRule">Rule to Evaluate:</label>
+                <textarea id="evalRule" placeholder="Enter rule, e.g., age > 30 AND department = 'Sales'"></textarea>
+                <label for="userData">User Data (JSON):</label>
+                <textarea id="userData" placeholder="Enter user data, e.g., {&quot;age&quot;: 35, &quot;department&quot;: &quot;Sales&quot;, &quot;salary&quot;: 60000, &quot;experience&quot;: 3}"></textarea>
+                <button type="submit">Evaluate Rule</button>
+            </form>
+        </div>
 
-    <!-- Result display -->
-    <div class="result" id="result"></div>
+        <!-- Loading indicator -->
+        <div class="loading" id="loading">
+            <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading...">
+            <p>Processing your request...</p>
+        </div>
+
+        <!-- Result display -->
+        <div class="result" id="result">
+            <pre id="resultContent"></pre>
+        </div>
+    </div>
 
     <script>
+        const resultDiv = document.getElementById('result');
+        const resultContent = document.getElementById('resultContent');
+        const loadingDiv = document.getElementById('loading');
+
+        async function fetchAPI(url, data) {
+            loadingDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            loadingDiv.style.display = 'none';
+            resultDiv.style.display = 'block';
+            return result;
+        }
+
         // API request to create a rule
         document.getElementById('createRuleForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const rule = document.getElementById('rule').value;
-            const response = await fetch('/api/rules/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rule: rule })
-            });
-            const result = await response.json();
-            document.getElementById('result').innerText = 'Created Rule AST: ' + JSON.stringify(result, null, 2);
+            const result = await fetchAPI('/api/rules/create', { rule });
+            resultContent.innerText = 'Created Rule AST: ' + JSON.stringify(result, null, 2);
         });
 
         // API request to combine rules
         document.getElementById('combineRulesForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const rules = document.getElementById('rules').value.split(',').map(r => r.trim());
-            const response = await fetch('/api/rules/combine', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rules: rules })
-            });
-            const result = await response.json();
-            document.getElementById('result').innerText = 'Combined Rule AST: ' + JSON.stringify(result, null, 2);
+            const result = await fetchAPI('/api/rules/combine', { rules });
+            resultContent.innerText = 'Combined Rule AST: ' + JSON.stringify(result, null, 2);
         });
 
         // API request to evaluate a rule
@@ -98,13 +186,8 @@
             e.preventDefault();
             const rule = document.getElementById('evalRule').value;
             const userData = JSON.parse(document.getElementById('userData').value);
-            const response = await fetch('/api/rules/evaluate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rule: rule, userData: userData })
-            });
-            const result = await response.json();
-            document.getElementById('result').innerText = 'Evaluation Result: ' + JSON.stringify(result, null, 2);
+            const result = await fetchAPI('/api/rules/evaluate', { rule, userData });
+            resultContent.innerText = 'Evaluation Result: ' + JSON.stringify(result, null, 2);
         });
     </script>
 

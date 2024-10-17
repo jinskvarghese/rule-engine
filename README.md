@@ -1,13 +1,26 @@
-# Rule Engine Application with AST
+# Rule Engine Application with AST (Frontend + Backend)
 
 ## Overview
-This project implements a 3-tier rule engine application where rules can be dynamically created and evaluated based on user attributes. The rules are represented using an Abstract Syntax Tree (AST).
+This application is a 3-tier rule engine that allows users to define eligibility rules based on attributes like age, department, income, and spend. The system utilizes an Abstract Syntax Tree (AST) to represent, evaluate, and modify rules dynamically. The primary user interaction happens via the **frontend UI**, which provides an intuitive way to create, combine, and evaluate rules.
+
 
 ### Key Features:
-- Dynamic creation, combination, and evaluation of rules using AST.
-- Rule evaluation against user data based on conditions such as age, department, salary, etc.
-- Error handling and validation for rule creation and data formats.
-- Basic UI for interacting with the Rule Engine.
+- **Frontend UI**: A simple, user-friendly interface for creating, combining, and evaluating rules.
+- **Rule Creation**: Users can dynamically define rules based on attributes such as `age`, `department`, `salary`, etc.
+- **Rule Combination**: Multiple rules can be combined and stored for future evaluations.
+- **Rule Evaluation**: The frontend allows users to submit a JSON object for rule evaluation.
+- **Backend API**: The frontend communicates with the backend to handle all operations related to rule creation, combination, and evaluation.
+- **Caching**: Optimized with caching mechanisms to improve performance when evaluating frequently used rules.
+- **Security**: The system has basic security (HTTP basic authentication) to restrict unauthorized access.
+
+---
+
+## Tech Stack
+- **Frontend**: HTML, CSS, JavaScript (for making API calls).
+- **Backend**: Spring Boot, Java, REST API.
+- **Database**: PostgreSQL (for rule storage).
+- **Caching**: In-memory caching using Spring Cache.
+- **Security**: HTTP Basic Authentication for protected endpoints.
 
 ---
 
@@ -109,7 +122,7 @@ The project includes a basic HTML-based frontend to interact with the API.
 
 ### Accessing the UI
 1. Start the Spring Boot application.
-2. Open a browser and go to http://localhost:8080/index.html.
+2. Open a browser and go to http://localhost:8080.
 
 ### Security Layer
 - A basic HTTP authentication has been implemented using Spring Security.
@@ -121,7 +134,7 @@ The project includes a basic HTML-based frontend to interact with the API.
 
 The application uses Spring Boot's caching mechanism to optimize the performance of rule evaluations. The `@Cacheable` annotation is used in the `RuleEvaluationService` to cache rule evaluation results for repeated inputs. The caching mechanism stores the evaluated results of rules to avoid recomputation.
 
-- **Cache Type**: Ehcache/Caffeine
+- **Cache Type**: Caffeine
 - **Cache Name**: `ruleEvaluations`
 - **Cache Expiry**: Entries expire after 10 minutes
 - **Maximum Cache Size**: 500 (if using Caffeine)
@@ -133,6 +146,34 @@ To modify the caching behavior, adjust the cache settings in `application.proper
 - Create Rule: Allows users to input a rule and submit it to the /create API.
 - Combine Rules: Accepts multiple rules (comma-separated) and submits them to the /combine API.
 - Evaluate Rule: Inputs both a rule and user data in JSON format to evaluate the rule via the /evaluate API.
+
+## Example Flow:
+1. Create Rule:
+
+Enter a rule like 
+````shell
+age > 30 AND department = 'Sales'
+````
+Click on Create Rule.
+The rule's AST will be displayed below.
+
+2. Combine Rules:
+
+Enter multiple rules separated by commas, e.g., 
+````shell
+age > 30 AND department = 'Sales', age < 25 AND department = 'Marketing'
+````
+Click Combine Rules.
+
+The combined rule AST will be displayed.
+3. Evaluate Rule:
+
+Enter a rule and JSON data in the form:
+````shell
+{"age": 35, "department": "Sales", "salary": 60000, "experience": 3}
+````
+Click Evaluate Rule.
+The result (True/False) will be displayed.
 
 ## Design Choices
 ### Abstract Syntax Tree (AST) for Rule Representation:
@@ -148,3 +189,8 @@ JavaScript (with fetch) is used for making API calls.
 ## Non-Functional Items
 - Error Handling: The application includes custom error handling for invalid rule strings and malformed data. Validation is performed during rule creation to ensure correctness.
 - Performance Considerations: AST ensures that rule evaluation is efficient, even for complex conditions. The structure is built to handle dynamic modification without affecting performance.
+
+## Additional Notes
+- **Performance**: Caching has been implemented to optimize evaluation speed for frequently used rules.
+- **Security**: Basic HTTP authentication is implemented to restrict access to API endpoints.
+- **Extensibility**: The system is designed to support dynamic rule modifications and extensions in the future.
