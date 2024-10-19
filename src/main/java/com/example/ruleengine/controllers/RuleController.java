@@ -1,12 +1,11 @@
 package com.example.ruleengine.controllers;
 
 // import org.hibernate.mapping.Map;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,10 +29,8 @@ public class RuleController {
 
     // Endpoint to combine two rules
     @PostMapping("/combine")
-    public Node combineRules(@RequestBody CombineRuleRequest request) {
-        Node rule1 = ruleService.createRule(request.getRule1());
-        Node rule2 = ruleService.createRule(request.getRule2());
-        return ruleService.combineRules(rule1, rule2);
+    public Node combineRules(@RequestBody List<String> rules) {
+        return ruleService.combineRules(rules);  // Pass the list of rule strings to the service
     }
 
     public static class CombineRuleRequest {
@@ -129,10 +126,10 @@ public class RuleController {
         }
     }
 
-    @GetMapping("/rules")
-    public List<String> getAllRules() {
-        // Assuming you store the rules in a list or a database
-        return ruleService.getAllRules();
-    }
+    // @GetMapping("/rules")
+    // public List<String> getAllRules() {
+    //     // Assuming you store the rules in a list or a database
+    //     return ruleService.getAllRules();
+    // }
 
 }

@@ -1,15 +1,15 @@
 package com.example.ruleengine.services;
 
+import java.util.ArrayList;
+import java.util.List;
 // import org.hibernate.mapping.Map;
 import java.util.Map;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.example.ruleengine.repositories.RuleRepository;
-
 
 import com.example.ruleengine.models.Node;
+import com.example.ruleengine.repositories.RuleRepository;
 @Service
 public class RuleService {
 
@@ -31,11 +31,11 @@ public Node createRule(String ruleString) {
     }
 }
 
-// Separate method to save the rule
-public Rule saveRule(String ruleString) {
-    Rule rule = new Rule(ruleString);
-    return ruleRepository.save(rule);  // Save Rule object to the database
-}
+// // Separate method to save the rule
+// public Rule saveRule(String ruleString) {
+//     Rule rule = new Rule(ruleString);
+//     return ruleRepository.save(rule);  // Save Rule object to the database
+// }
 
     private Node validateAndCreateOperand(String condition) {
         String[] parts = condition.split(" ");
@@ -75,10 +75,29 @@ public Rule saveRule(String ruleString) {
         return new Node("operator", leftNode, rightNode, operator);
     }
 
-    // Method to combine multiple rules into a single AST
-    public Node combineRules(Node rule1, Node rule2) {
-        return new Node("operator", rule1, rule2, "AND"); // Combines rule1 and rule2 using AND
+public Node combineRules(List<String> ruleStrings) {
+    if (ruleStrings == null || ruleStrings.isEmpty()) {
+        throw new IllegalArgumentException("No rules provided.");
     }
+
+    List<Node> nodes = new ArrayList<>();
+    for (String ruleString : ruleStrings) {
+        if (ruleString == null || ruleString.trim().isEmpty()) {
+            throw new IllegalArgumentException("One of the rule strings is null or empty.");
+        }
+        nodes.add(createRule(ruleString));  // Create AST for each rule
+    }
+
+    // Combine all nodes using AND operator as an example
+    Node combinedNode = nodes.get(0);
+    for (int i = 1; i < nodes.size(); i++) {
+        // Create a new operator node combining the previous nodes
+        combinedNode = new Node("operator", combinedNode, nodes.get(i), "AND");  // Combine with AND operator
+    }
+
+    return combinedNode;  // Return the combined AST
+}
+
 
     // Method to evaluate a rule against user data (for later)
     public boolean evaluateRule(Node rule, Map<String, Object> userData) {
@@ -139,9 +158,9 @@ public Rule saveRule(String ruleString) {
         return root;
     }
 
-    public List<String> getAllRules() {
-        // This method should return a list of rule strings or ASTs
-        return ruleRepository.findAll(); // If stored in a repository or database
-    }
+    // public List<String> getAllRules() {
+    //     // This method should return a list of rule strings or ASTs
+    //     return ruleRepository.findAll(); // If stored in a repository or database
+    // }
     
 }

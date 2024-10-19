@@ -232,13 +232,19 @@
             resultContent.innerText = 'Created Rule AST: ' + JSON.stringify(result, null, 2);
         });
 
-        // API request to combine rules
-        document.getElementById('combineRulesForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const rules = document.getElementById('rules').value.split(',').map(r => r.trim());
-            const result = await fetchAPI('/api/rules/combine', { rules });
-            resultContent.innerText = 'Combined Rule AST: ' + JSON.stringify(result, null, 2);
-        });
+    // API request to combine rules
+    document.getElementById('combineRulesForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const rules = document.getElementById('rules').value.split(',').map(r => r.trim()); // Convert to array
+    const response = await fetch('/api/rules/combine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rules)  // Send as array
+    });
+    const result = await response.json();
+    document.getElementById('result').innerText = 'Combined Rule AST: ' + JSON.stringify(result, null, 2);
+});
+
 
         // API request to evaluate a rule
         document.getElementById('evaluateRuleForm').addEventListener('submit', async function(e) {
