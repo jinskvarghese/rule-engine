@@ -2,9 +2,11 @@ package com.example.ruleengine.controllers;
 
 // import org.hibernate.mapping.Map;
 import java.util.Map;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -126,4 +128,11 @@ public class RuleController {
             this.newCondition = newCondition;
         }
     }
+
+    @GetMapping("/rules")
+    public List<String> getAllRules() {
+        // Assuming you store the rules in a list or a database
+        return ruleService.getAllRules();
+    }
+
 }

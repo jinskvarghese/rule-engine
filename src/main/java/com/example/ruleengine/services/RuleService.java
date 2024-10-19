@@ -2,27 +2,40 @@ package com.example.ruleengine.services;
 
 // import org.hibernate.mapping.Map;
 import java.util.Map;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.example.ruleengine.repositories.RuleRepository;
+
 
 import com.example.ruleengine.models.Node;
 @Service
 public class RuleService {
 
-    // Method to create an AST from a rule string
-    public Node createRule(String ruleString) {
-        ruleString = ruleString.trim().replaceAll("^\"|\"$", "");
+    @Autowired
+    private RuleRepository ruleRepository;
 
-        if (ruleString == null || ruleString.isEmpty()) {
-            throw new IllegalArgumentException("Rule string cannot be empty.");
-        }
-
-        if (ruleString.contains("AND") || ruleString.contains("OR")) {
-            return parseComplexRule(ruleString);
-        } else {
-            return validateAndCreateOperand(ruleString);
-        }
+// Method to create an AST from a rule string
+public Node createRule(String ruleString) {
+    if (ruleString == null || ruleString.isEmpty()) {
+        throw new IllegalArgumentException("Rule string cannot be null or empty.");
     }
+    
+    ruleString = ruleString.trim().replaceAll("^\"|\"$", "");
+    
+    if (ruleString.contains("AND") || ruleString.contains("OR")) {
+        return parseComplexRule(ruleString);  // Create AST for complex rules
+    } else {
+        return validateAndCreateOperand(ruleString);  // Create AST for simple operand
+    }
+}
+
+// Separate method to save the rule
+public Rule saveRule(String ruleString) {
+    Rule rule = new Rule(ruleString);
+    return ruleRepository.save(rule);  // Save Rule object to the database
+}
 
     private Node validateAndCreateOperand(String condition) {
         String[] parts = condition.split(" ");
@@ -125,4 +138,10 @@ public class RuleService {
 
         return root;
     }
+
+    public List<String> getAllRules() {
+        // This method should return a list of rule strings or ASTs
+        return ruleRepository.findAll(); // If stored in a repository or database
+    }
+    
 }

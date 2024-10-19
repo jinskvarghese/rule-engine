@@ -10,6 +10,7 @@ This application is a 3-tier rule engine that allows users to define eligibility
 - **Rule Combination**: Multiple rules can be combined and stored for future evaluations.
 - **Rule Evaluation**: The frontend allows users to submit a JSON object for rule evaluation.
 - **Backend API**: The frontend communicates with the backend to handle all operations related to rule creation, combination, and evaluation.
+- **WebSocket Integration**: Real-time updates for rule creation and evaluation.
 - **Caching**: Optimized with caching mechanisms to improve performance when evaluating frequently used rules.
 - **Security**: The system has basic security (HTTP basic authentication) to restrict unauthorized access.
 
@@ -20,6 +21,7 @@ This application is a 3-tier rule engine that allows users to define eligibility
 - **Backend**: Spring Boot, Java, REST API.
 - **Database**: PostgreSQL (for rule storage).
 - **Caching**: In-memory caching using Spring Cache.
+- **WebSocket**: Real-time communication using SockJS and STOMP
 - **Security**: HTTP Basic Authentication for protected endpoints.
 
 ---
@@ -76,7 +78,7 @@ docker run --name postgres-container -e POSTGRES_USER=rule_engine_user -e POSTGR
 
 ### API Endpoints
 1. Create Rule
-**URL**: /api/rules/create
+**URL**: `/api/rules/create`
 **Method**: POST
 **Request Body**:
 ````shell
@@ -87,7 +89,7 @@ docker run --name postgres-container -e POSTGRES_USER=rule_engine_user -e POSTGR
 **Response**: Returns the Abstract Syntax Tree (AST) representation of the rule.
 
 2. Combine Rules
-**URL**: /api/rules/combine
+**URL**: `/api/rules/combine`
 **Method**: POST
 **Request Body**:
 ````shell
@@ -100,8 +102,20 @@ docker run --name postgres-container -e POSTGRES_USER=rule_engine_user -e POSTGR
 ````
 **Response**: Returns the combined AST of the provided rules.
 
-3. Evaluate Rule
-**URL**: /api/rules/evaluate
+3. Modify Rule
+- **URL** `/api/rules/modify`
+- **Method**:POST
+- **Request Body**: 
+    ```shell
+    {
+      "oldCondition": "age > 30",
+      "newCondition": "age < 25"
+    }
+    ```
+- **Response**: Returns the modified Abstract Syntax Tree (AST).
+
+4. Evaluate Rule
+**URL**: `/api/rules/evaluate`
 **Method**: POST
 **Request Body**:
 ````shell
@@ -116,6 +130,9 @@ docker run --name postgres-container -e POSTGRES_USER=rule_engine_user -e POSTGR
 }
 ````
 **Response**: Returns true if the rule matches the user data, otherwise false.
+
+## WebSocket Integration (Real-time Updates)
+The application provides real-time rule creation and evaluation updates using WebSockets. These updates are displayed directly on the frontend.
 
 ## Frontend UI
 The project includes a basic HTML-based frontend to interact with the API.
@@ -164,8 +181,8 @@ Enter multiple rules separated by commas, e.g.,
 age > 30 AND department = 'Sales', age < 25 AND department = 'Marketing'
 ````
 Click Combine Rules.
-
 The combined rule AST will be displayed.
+
 3. Evaluate Rule:
 
 Enter a rule and JSON data in the form:
@@ -194,3 +211,12 @@ JavaScript (with fetch) is used for making API calls.
 - **Performance**: Caching has been implemented to optimize evaluation speed for frequently used rules.
 - **Security**: Basic HTTP authentication is implemented to restrict access to API endpoints.
 - **Extensibility**: The system is designed to support dynamic rule modifications and extensions in the future.
+- **WebSocket Integration**: This provides real-time updates using WebSockets.
+
+### Future Enhancements: User-Defined Functions
+
+The system can be extended to support user-defined functions within the rule language. This would allow for advanced conditions and computations, such as:
+- `calculateBonus(salary, experience)`
+- `isEligibleForPromotion(age, department)`
+
+This feature is not implemented in the current version but is a potential future enhancement.

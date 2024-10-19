@@ -98,6 +98,46 @@
         .loading img {
             width: 50px;
         }
+
+        .real-time-updates {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 100px;
+        }
+        .real-time-updates {
+            margin-top: 30px;
+        }
+        .updates-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .rule-box, .evaluation-box {
+            margin-bottom: 15px;
+            padding: 30px;
+            background-color: #eaf2fa;
+            border-radius: 5px;
+
+        }
+        .rule-box h3, .evaluation-box h3 {
+            color: #0056b3;
+        }
+
+        /* Form styling for modify rule */
+        #modifyRuleForm {
+            margin-top: 20px;
+            padding: 10px;
+            /* border: 2px solid #333; */
+            background-color: #f8f9fa;
+        }
+
     </style>
 </head>
 <body>
@@ -123,6 +163,18 @@
             </form>
         </div>
 
+        <!-- Form for modifying a rule -->
+        <form id="modifyRuleForm">
+            <label for="oldCondition">Old Condition:</label>
+            <input type="text" id="oldCondition" placeholder="Enter old condition" />
+            
+            <label for="newCondition">New Condition:</label>
+            <input type="text" id="newCondition" placeholder="Enter new condition" />
+            
+            <button type="submit">Modify Rule</button>
+        </form>
+
+
         <!-- Form for evaluating rule -->
         <div class="form-card">
             <form id="evaluateRuleForm">
@@ -144,6 +196,13 @@
         <div class="result" id="result">
             <pre id="resultContent"></pre>
         </div>
+
+            <!-- WebSocket Updates -->
+            <div class="real-time-updates" id="realTimeUpdates">
+                <div class="updates-header">Real-time Updates:</div>
+                <!-- <div class="rule-box" id="ruleUpdate"></div> -->
+                <!-- <div class="evaluation-box" id="evaluationUpdate"></div> -->
+            </div>
     </div>
 
     <script>
@@ -188,6 +247,59 @@
             const userData = JSON.parse(document.getElementById('userData').value);
             const result = await fetchAPI('/api/rules/evaluate', { rule, userData });
             resultContent.innerText = 'Evaluation Result: ' + JSON.stringify(result, null, 2);
+        });
+
+        // API request to modify a rule
+        document.getElementById('modifyRuleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const oldCondition = document.getElementById('oldCondition').value;
+            const newCondition = document.getElementById('newCondition').value;
+
+            const response = await fetch('/api/rules/modify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldCondition: oldCondition, newCondition: newCondition })
+            });
+            const result = await response.json();
+            document.getElementById('result').innerText = 'Modified Rule AST: ' + JSON.stringify(result, null, 2);
+        });
+
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <script>
+        // WebSocket connection setup
+        var socket = new SockJS('/rule-engine-websocket');
+        var stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+
+            // Subscribe to rule creation updates
+            stompClient.subscribe('/topic/ruleUpdates', function(message) {
+                document.getElementById('realTimeUpdates').innerText = message.body;
+            });
+
+            // Subscribe to evaluation updates
+            stompClient.subscribe('/topic/evaluationUpdates', function(message) {
+                document.getElementById('realTimeUpdates').innerText = message.body;
+            });
+        });
+
+        // Handle rule creation form submission
+        document.getElementById('createRuleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var rule = document.getElementById('rule').value;
+            stompClient.send("/app/createRule", {}, rule);
+        });
+
+        // Handle rule evaluation form submission
+        document.getElementById('evaluateRuleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var evalRule = document.getElementById('evalRule').value;
+            stompClient.send("/app/evaluateRule", {}, evalRule);
         });
     </script>
 
