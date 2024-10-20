@@ -7,6 +7,10 @@ public class Node {
     private String value;  // Condition for operand nodes (e.g., "age > 30")
     private String operator; // Operator for operator nodes ("AND" or "OR")
 
+        // No-argument constructor (required for Spring or Jackson)
+        public Node() {
+        }
+        
     // Constructor for operator nodes
     public Node(String type, Node left, Node right, String operator) {
         this.type = type;
@@ -61,4 +65,5 @@ public class Node {
     public void setOperator(String operator) {
         this.operator = operator;
     }
+    
 }

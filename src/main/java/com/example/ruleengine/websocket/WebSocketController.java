@@ -14,13 +14,13 @@ public class WebSocketController {
     }
 
     @MessageMapping("/combineRules")
-    @SendTo("/topic/ruleUpdates")
+    @SendTo("/topic/rulecomb")
     public String sendCombineRuleUpdates(String message) throws Exception {
         return "Rules Combined: " + message;
     }
 
     @MessageMapping("/modifyRule")
-    @SendTo("/topic/ruleUpdates")
+    @SendTo("/topic/rulemod")
     public String sendModifyRuleUpdates(String message) throws Exception {
         return "Rule Modified: " + message;
     }

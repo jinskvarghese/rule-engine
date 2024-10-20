@@ -288,6 +288,14 @@
                 document.getElementById('realTimeUpdates').innerText = message.body;
             });
 
+            stompClient.subscribe('/topic/rulecomb', function(message) {
+                document.getElementById('realTimeUpdates').innerText = message.body;
+            });
+
+            stompClient.subscribe('/topic/rulemod', function(message) {
+                document.getElementById('realTimeUpdates').innerText = message.body;
+            });
+
             // Subscribe to evaluation updates
             stompClient.subscribe('/topic/evaluationUpdates', function(message) {
                 document.getElementById('realTimeUpdates').innerText = message.body;

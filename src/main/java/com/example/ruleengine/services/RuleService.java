@@ -2,7 +2,6 @@ package com.example.ruleengine.services;
 
 import java.util.ArrayList;
 import java.util.List;
-// import org.hibernate.mapping.Map;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;

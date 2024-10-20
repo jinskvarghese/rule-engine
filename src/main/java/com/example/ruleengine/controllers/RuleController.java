@@ -90,10 +90,23 @@ public class RuleController {
     }
 
     @PostMapping("/modify")
-    public Node modifyRule(@RequestBody ModifyRequest request) {
-        Node rule = ruleService.createRule(request.getRule());
-        return ruleService.modifyRule(rule, request.getOldCondition(), request.getNewCondition());
+    public Node modifyRule(Node root, String oldCondition, String newCondition) {
+        if (root == null) return null;
+    
+        // If the current node is an operand and matches the old condition, replace it
+        if (root.getType().equals("operand") && root.getValue().equals(oldCondition)) {
+            root.setValue(newCondition);
+            return root;
+        }
+    
+        // Recursively check left and right nodes
+        root.setLeft(modifyRule(root.getLeft(), oldCondition, newCondition));
+        root.setRight(modifyRule(root.getRight(), oldCondition, newCondition));
+    
+        return root;
     }
+    
+    
 
     // DTO for modify request
     public static class ModifyRequest {

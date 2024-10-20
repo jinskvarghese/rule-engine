@@ -40,4 +40,6 @@ public class Rule {
     public void setRuleString(String ruleString) {
         this.ruleString = ruleString;
     }
+
+    
 }
