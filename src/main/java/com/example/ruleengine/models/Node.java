@@ -13,6 +13,9 @@ public class Node {
         
     // Constructor for operator nodes
     public Node(String type, Node left, Node right, String operator) {
+        if (type == null || type.isEmpty()) {
+            throw new IllegalArgumentException("Type cannot be null or empty.");
+        }
         this.type = type;
         this.left = left;
         this.right = right;
@@ -21,6 +24,9 @@ public class Node {
 
     // Constructor for operand nodes
     public Node(String type, String value) {
+        if (type == null || type.isEmpty()) {
+            throw new IllegalArgumentException("Type cannot be null or empty.");
+        }
         this.type = type;
         this.value = value;
     }

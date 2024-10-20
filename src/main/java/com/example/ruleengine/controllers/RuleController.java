@@ -89,31 +89,12 @@ public class RuleController {
         }
     }
 
-    @PostMapping("/modify")
-    public Node modifyRule(Node root, String oldCondition, String newCondition) {
-        if (root == null) return null;
-    
-        // If the current node is an operand and matches the old condition, replace it
-        if (root.getType().equals("operand") && root.getValue().equals(oldCondition)) {
-            root.setValue(newCondition);
-            return root;
-        }
-    
-        // Recursively check left and right nodes
-        root.setLeft(modifyRule(root.getLeft(), oldCondition, newCondition));
-        root.setRight(modifyRule(root.getRight(), oldCondition, newCondition));
-    
-        return root;
-    }
-    
-    
-
-    // DTO for modify request
     public static class ModifyRequest {
-        private String rule;
-        private String oldCondition;
-        private String newCondition;
+        private String rule;          // Rule in string format (JSON or custom format)
+        private String oldCondition;  // Old condition to be replaced
+        private String newCondition;  // New condition to replace with
 
+        // Getters and Setters
         public String getRule() {
             return rule;
         }
@@ -138,6 +119,72 @@ public class RuleController {
             this.newCondition = newCondition;
         }
     }
+
+    @PostMapping("/modify")
+    public Node modifyRule(@RequestBody ModifyRequest modifyRequest) {
+        // Parse the rule string (e.g., "age > 30 AND department = 'Sales'") to create the root Node (AST)
+        Node root = parseRuleToAST(modifyRequest.getRule());
+    
+        // Modify the rule AST
+        return modifyRule(root, modifyRequest.getOldCondition(), modifyRequest.getNewCondition());
+    }
+
+    // Helper method to modify the AST
+private Node modifyRule(Node root, String oldCondition, String newCondition) {
+    if (root == null) {
+        throw new IllegalArgumentException("Root node cannot be null.");
+    }
+
+    // Check if the node type is initialized
+    if (root.getType() == null) {
+        throw new IllegalStateException("Node type is not initialized.");
+    }
+
+    // If the current node is an operand and matches the old condition, replace it
+    if (root.getType().equals("operand") && root.getValue().equals(oldCondition)) {
+        root.setValue(newCondition);
+        return root;
+    }
+
+    // Recursively check left and right nodes
+    root.setLeft(modifyRule(root.getLeft(), oldCondition, newCondition));
+    root.setRight(modifyRule(root.getRight(), oldCondition, newCondition));
+
+    return root;
+}
+    
+    private Node parseRuleToAST(String rule) {
+        // Example parsing logic (you can enhance this to handle more complex rules)
+        // This assumes the rule is simple, like "age > 30 AND department = 'Sales'"
+        String[] parts = rule.split(" AND ");  // Simple case of AND operator
+    
+        // Create operand nodes for each condition
+        Node leftOperand = validateAndCreateOperand(parts[0]);
+        Node rightOperand = validateAndCreateOperand(parts[1]);
+    
+        // Return the root node for the rule
+        return new Node("operator", leftOperand, rightOperand, "AND");
+    }
+    
+    private Node validateAndCreateOperand(String condition) {
+        // Your validation logic here, e.g., splitting the condition into parts
+        String[] parts = condition.split(" ");
+        if (parts.length != 3) {
+            throw new IllegalArgumentException("Invalid condition format: " + condition);
+        }
+    
+        String attribute = parts[0];
+        String operator = parts[1];
+        String value = parts[2];
+    
+        // Validate the operator
+        if (!operator.matches(">|<|=")) {
+            throw new IllegalArgumentException("Invalid operator in condition: " + operator);
+        }
+    
+        return new Node("operand", condition);  // Create an operand node with the condition
+    }
+    
 
     // @GetMapping("/rules")
     // public List<String> getAllRules() {

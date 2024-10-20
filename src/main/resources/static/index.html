@@ -163,14 +163,16 @@
             </form>
         </div>
 
-        <!-- Form for modifying a rule -->
         <form id="modifyRuleForm">
+            <label for="rule">Rule:</label>
+            <input type="text" id="rule" placeholder="Enter the full rule" />
+        
             <label for="oldCondition">Old Condition:</label>
             <input type="text" id="oldCondition" placeholder="Enter old condition" />
-            
+        
             <label for="newCondition">New Condition:</label>
             <input type="text" id="newCondition" placeholder="Enter new condition" />
-            
+        
             <button type="submit">Modify Rule</button>
         </form>
 
@@ -256,20 +258,36 @@
         });
 
         // API request to modify a rule
-        document.getElementById('modifyRuleForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const oldCondition = document.getElementById('oldCondition').value;
-            const newCondition = document.getElementById('newCondition').value;
+        document.getElementById('modifyRuleForm').addEventListener('submit', function(event) {
+        event.preventDefault();  // Prevent the default form submission
 
-            const response = await fetch('/api/rules/modify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ oldCondition: oldCondition, newCondition: newCondition })
-            });
-            const result = await response.json();
-            document.getElementById('result').innerText = 'Modified Rule AST: ' + JSON.stringify(result, null, 2);
+        var rule = document.getElementById('rule').value;
+        var oldCondition = document.getElementById('oldCondition').value;
+        var newCondition = document.getElementById('newCondition').value;
+
+        // Create the request body
+        var requestBody = {
+            "rule": rule,  // The full rule entered by the user (e.g., "age > 30 AND department = 'Sales'")
+            "oldCondition": oldCondition,
+            "newCondition": newCondition
+        };
+
+        // Send the request to the backend
+        fetch('/api/rules/modify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Modified Rule AST:', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
-
+    });
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>

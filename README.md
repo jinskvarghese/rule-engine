@@ -1,7 +1,7 @@
 # Rule Engine Application with AST (Frontend + Backend)
 
 ## Overview
-This application is a 3-tier rule engine that allows users to define eligibility rules based on attributes like age, department, income, and spend. The system utilizes an Abstract Syntax Tree (AST) to represent, evaluate, and modify rules dynamically. The primary user interaction happens via the **frontend UI**, which provides an intuitive way to create, combine, and evaluate rules.
+This application is a 3-tier rule engine that allows users to define eligibility rules based on attributes like age, department, income, and spend. The system utilizes an Abstract Syntax Tree (AST) to represent, evaluate, and modify rules dynamically. The primary user interaction happens via the frontend UI, which provides an intuitive way to create, combine, and evaluate rules.
 
 
 ### Key Features:

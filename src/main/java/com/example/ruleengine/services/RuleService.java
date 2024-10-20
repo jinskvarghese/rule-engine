@@ -142,7 +142,16 @@ public Node combineRules(List<String> ruleStrings) {
     }
 
     public Node modifyRule(Node root, String oldCondition, String newCondition) {
-        if (root == null) return null;
+        if (root == null) {
+            throw new IllegalArgumentException("Root node cannot be null.");
+        }
+    
+        if (root.getType() == null) {
+            throw new IllegalStateException("Node type is not set.");
+        }
+
+        System.out.println("Modifying Node: " + root.getValue() + ", type: " + root.getType());
+
 
         // If the current node is an operand and matches the old condition, replace it
         if (root.getType().equals("operand") && root.getValue().equals(oldCondition)) {
